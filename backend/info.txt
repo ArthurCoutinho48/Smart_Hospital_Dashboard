@@ -1,0 +1,4 @@
+Quando outra pessoa (ou você mesmo em outro computador) quiser rodar o projeto, basta instalar tudo com:
+
+pip install -r requirements.txt
+Pressione Ctrl + Shift + E (Windows/Linux)
