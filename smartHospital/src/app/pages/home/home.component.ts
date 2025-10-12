@@ -1,4 +1,7 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, AfterViewInit } from '@angular/core';
+import { Chart, ChartConfiguration, registerables } from 'chart.js';
+
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-home',
@@ -9,23 +12,21 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA, AfterViewInit } from '@angular/core'
 export class HomeComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
-    // Selecionando a lista de itens de navegação
+    this.setupMenu();
+    this.createBurndownChart();
+  }
+
+  private setupMenu() {
     const list = document.querySelectorAll(".navigation li");
 
-    // Hover com restauração
     list.forEach((item) => {
       item.addEventListener("mouseover", () => {
-        // Remover a classe 'hovered' de todos os itens
         list.forEach((i) => i.classList.remove("hovered"));
-        // Adiciona 'hovered' no item atual
         item.classList.add("hovered");
       });
 
       item.addEventListener("mouseout", () => {
-        // Remove a classe 'hovered' do item atual
         item.classList.remove("hovered");
-
-        // Adiciona 'hovered' no item ativo (se houver)
         const activeItem = document.querySelector(".navigation li a.active");
         if (activeItem) {
           const li = activeItem.closest("li");
@@ -34,7 +35,6 @@ export class HomeComponent implements AfterViewInit {
       });
     });
 
-    // Menu Toggle (abrir e fechar menu lateral)
     const toggle = document.querySelector(".toggle");
     const navigation = document.querySelector(".navigation");
     const main = document.querySelector(".main");
@@ -44,32 +44,22 @@ export class HomeComponent implements AfterViewInit {
       main?.classList.toggle("active");
     });
 
-    // Clique no menu e ativa a seção correspondente
     const links = document.querySelectorAll(".navigation li a");
 
     links.forEach((link) => {
       link.addEventListener("click", (event) => {
         event.preventDefault();
-
-        // Remove 'active' de todos os links
         links.forEach((l) => l.classList.remove("active"));
-
-        // Adiciona 'active' no link clicado
         const clickedLink = event.currentTarget as HTMLElement;
         clickedLink.classList.add("active");
-
-        // Reaplica classe 'hovered' no li correspondente
         list.forEach((i) => i.classList.remove("hovered"));
         clickedLink.closest("li")?.classList.add("hovered");
 
-        // Pega a seção alvo
         const sectionTarget = clickedLink.getAttribute("data-section");
         if (!sectionTarget) return;
 
-        // Remove a classe 'active' de todas as seções
         document.querySelectorAll(".section").forEach((s) => s.classList.remove("active"));
 
-        // Adiciona a classe 'active' na seção correspondente
         const targetSection = document.getElementById(`section-${sectionTarget}`);
         if (targetSection) {
           targetSection.classList.add("active");
@@ -80,4 +70,74 @@ export class HomeComponent implements AfterViewInit {
     });
   }
 
+  private createBurndownChart() {
+    const totalDias = 7;
+    const pontosTotais = 35;
+
+    // Linha Ideal: linear, decrescendo de 35 a 0
+    const ideal = Array.from({ length: totalDias }, (_, i) =>
+      Math.round(pontosTotais - (pontosTotais / (totalDias - 1)) * i)
+    );
+
+    // Linha Real: exemplo de progresso real
+    const real = [35, 33, 28, 26, 22, 18, 12]; // Você pode puxar isso da API depois
+
+    const data = {
+      labels: ['Dia 1', 'Dia 2', 'Dia 3', 'Dia 4', 'Dia 5', 'Dia 6', 'Dia 7'],
+      datasets: [
+        {
+          label: 'Ideal',
+          data: ideal,
+          borderColor: '#999',
+          borderDash: [10, 5],
+          fill: false,
+          tension: 0,
+        },
+        {
+          label: 'Real',
+          data: real,
+          borderColor: '#4bc0c0',
+          backgroundColor: '#4bc0c0',
+          fill: false,
+          tension: 0.2,
+        }
+      ]
+    };
+
+    const config: ChartConfiguration<'line'> = {
+      type: 'line',
+      data: data,
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Dia da Sprint',
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Pontos Restantes',
+            },
+            min: 0,
+            max: pontosTotais
+          }
+        },
+        plugins: {
+          title: {
+            display: true,
+            text: 'Gráfico de Burndown - Ideal vs Real'
+          },
+          legend: {
+            display: true,
+            position: 'bottom'
+          }
+        }
+      }
+    };
+
+    new Chart('burndownCanvas', config);
+  }
 }

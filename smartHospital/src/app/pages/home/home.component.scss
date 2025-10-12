@@ -239,6 +239,12 @@
 
 /* ================== Charts JS ============== */
 
+.burndown{
+  position: relative;
+  width: 100%;
+  margin-top: 30px;
+}
+
 .chartsBx{
   position: relative;
   width: 100%;
@@ -246,6 +252,10 @@
   display: grid;
   grid-template-columns: 1fr 2fr;
   grid-gap: 30px;
+}
+
+.inferior {
+  grid-template-columns: 1fr; /* apenas uma coluna */
 }
 
 .chartsBx .chart{
@@ -258,11 +268,23 @@
   //border: 1px solid var(--s-03);
 }
 
+.chartsBx .chart h4{
+  position: relative;
+  font-weight: 500;
+  font-size: 1.5rem;
+  color: var(--s-03);
+}
+
 .cardBacklog{
   height: 50px;
   width: 100%;
+  margin-top: 20px;
+  padding: 10px;
+   color: var(--p-02);
   background: var(--s-03);
   border-radius: 10px;
+  display: flex;
+  align-items: center;
 }
 
 
